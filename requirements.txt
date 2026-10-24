@@ -1,0 +1,11 @@
+# VoxAura runtime dependencies.
+# Python 3.12 is REQUIRED: kokoro 0.9.x declares Requires-Python >=3.10,<3.13.
+# faster-whisper itself supports Python >=3.9 and bundles PyAV (no system ffmpeg needed).
+fastapi>=0.115,<1
+uvicorn>=0.30,<1
+python-multipart>=0.0.9
+kokoro>=0.9.4,<1
+misaki[en]>=0.9.4
+faster-whisper>=1.1,<2
+numpy>=1.26
+soundfile>=0.12

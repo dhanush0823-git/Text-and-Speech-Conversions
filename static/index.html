@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VoxAura — AI Text &amp; Speech Converter</title>
+  <meta name="description" content="Your words, transformed into sound.">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <span class="wordmark">Vox<span>Aura</span></span>
+      <span class="brand-label">Text &amp; Speech Converter</span>
+    </div>
+    <div class="server-status" role="status" aria-live="polite">
+      <span class="dot" id="statusDot"></span>
+      <span id="statusText">Checking server…</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro">
+      <h1>Your words, transformed into sound.</h1>
+      <p>Turn text into natural speech, or turn a recording into text. Everything runs on this computer.</p>
+    </section>
+
+    <div class="cards">
+      <!-- ===== Text to Speech ===== -->
+      <section class="card card-tts" aria-labelledby="ttsTitle">
+        <h2 id="ttsTitle">Text to Speech</h2>
+        <p class="card-desc">Type or paste text, pick a voice, and generate a WAV file with Kokoro.</p>
+
+        <label for="ttsText">Text</label>
+        <textarea id="ttsText" rows="8" placeholder="Paste or type what you want to hear…"></textarea>
+        <div class="field-meta">
+          <span id="ttsCount">0 / 5000</span>
+          <span>Longer text takes longer to process.</span>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="ttsVoice">Voice</label>
+            <select id="ttsVoice"></select>
+          </div>
+          <div class="field">
+            <label for="ttsSpeed">Speed <output id="ttsSpeedOut">1.0×</output></label>
+            <input type="range" id="ttsSpeed" min="0.7" max="1.3" step="0.05" value="1">
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn btn-primary" id="ttsGenerate">Generate Speech</button>
+          <button type="button" class="btn btn-ghost" id="ttsClear">Clear Text</button>
+        </div>
+
+        <div class="busy" id="ttsBusy" hidden><span class="spinner"></span><span id="ttsBusyText">Generating speech… the first run downloads model files and can take a few minutes.</span></div>
+        <p class="msg msg-error" id="ttsError" role="alert" hidden></p>
+        <p class="msg msg-ok" id="ttsOk" role="status" hidden></p>
+
+        <div class="result" id="ttsResult" hidden>
+          <audio id="ttsAudio" controls></audio>
+          <a class="btn btn-ghost" id="ttsDownload" download="voxaura-speech.wav" href="#">Download WAV</a>
+        </div>
+      </section>
+
+      <!-- ===== Speech to Text ===== -->
+      <section class="card card-stt" aria-labelledby="sttTitle">
+        <h2 id="sttTitle">Speech to Text</h2>
+        <p class="card-desc">Record from your microphone or upload a file, then transcribe it with faster-whisper.</p>
+
+        <div class="source-block">
+          <h3>Record</h3>
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" id="recStart">Start Recording</button>
+            <button type="button" class="btn btn-ghost" id="recStop" disabled>Stop Recording</button>
+            <span class="rec-info"><span id="recStatus">Idle</span> · <span id="recTime">0:00</span></span>
+          </div>
+        </div>
+
+        <div class="source-block">
+          <h3>Or upload a file</h3>
+          <label for="sttFile" class="sr-only">Audio file</label>
+          <input type="file" id="sttFile" accept=".wav,.mp3,.m4a,.webm,.mp4,.ogg,.opus,.flac,.aac,audio/*">
+          <p class="hint" id="sttFileName">WAV, MP3, M4A, WebM, MP4, OGG, FLAC or AAC.</p>
+        </div>
+
+        <audio id="sttPreview" controls hidden></audio>
+
+        <div class="row">
+          <div class="field">
+            <label for="sttModel">Model</label>
+            <select id="sttModel">
+              <option value="tiny">Tiny (fastest)</option>
+              <option value="base" selected>Base (default)</option>
+              <option value="small">Small (more accurate)</option>
+              <option value="medium">Medium (most accurate)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="sttLang">Language</label>
+            <select id="sttLang">
+              <option value="auto" selected>Detect automatically</option>
+              <option value="en">English</option>
+              <option value="es">Spanish</option>
+              <option value="fr">French</option>
+              <option value="de">German</option>
+              <option value="it">Italian</option>
+              <option value="pt">Portuguese</option>
+              <option value="nl">Dutch</option>
+              <option value="hi">Hindi</option>
+              <option value="ja">Japanese</option>
+              <option value="zh">Chinese</option>
+            </select>
+          </div>
+        </div>
+        <p class="hint">Tiny is fastest and uses the least memory; Medium is the most accurate but is slow on CPU and needs several GB of RAM. The first use of each model downloads it.</p>
+
+        <div class="actions">
+          <button type="button" class="btn btn-primary btn-mint" id="sttTranscribe" disabled>Transcribe Audio</button>
+        </div>
+
+        <div class="busy" id="sttBusy" hidden><span class="spinner"></span><span>Transcribing… the first run of a model downloads it first.</span></div>
+        <p class="msg msg-error" id="sttError" role="alert" hidden></p>
+
+        <div class="result-text">
+          <label for="sttTranscript">Transcript</label>
+          <textarea id="sttTranscript" rows="7" placeholder="Your transcript will appear here. You can edit it."></textarea>
+          <p class="hint" id="sttInfo" role="status"></p>
+          <div class="actions">
+            <button type="button" class="btn btn-ghost" id="sttCopy">Copy to Clipboard</button>
+            <button type="button" class="btn btn-ghost" id="sttDownloadTxt">Download TXT</button>
+            <button type="button" class="btn btn-ghost" id="sttClear">Clear Transcript</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">VoxAura — Local AI Text &amp; Speech Tools</footer>
+  <script src="/static/app.js"></script>
+</body>
+</html>
